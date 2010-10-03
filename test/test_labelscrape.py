@@ -13,25 +13,37 @@ class TextXPathGeneration(unittest.TestCase):
     def test_field_predicate(self):
         """Test the default constructed field predicate."""
         self.assertEqual(ls.field_predicate_xpath(),
-                         './/text:p[@text:style-name="P10"][text()]'
-                         ' and .//text:p[@text:style-name="P9"][text()]')
+                         './/text:p[@text:style-name="P10"]'
+                            '[child::text()]'
+                         ' and .//text:p[@text:style-name="P9"]'
+                            '[child::text()]')
 
     def test_negated_predicates(self):
         self.assertEqual(ls.field_predicate_xpath(negations=('price')),
-                         './/text:p[@text:style-name="P10"][text()] '
-                         'and not(.//text:p[@text:style-name="P9"][text()])')
+                         './/text:p[@text:style-name="P10"]'
+                            '[child::text()] '
+                         'and not(.//text:p[@text:style-name="P9"]'
+                            '[child::text()])')
 
     def test_template_predicate(self):
         self.assertEqual(ls.template_xpath('{name} and {price}'),
-                         './/text:p[@text:style-name="P10"][text()]'
-                         ' and .//text:p[@text:style-name="P9"][text()]')
+                         './/text:p[@text:style-name="P10"]'
+                            '[descendant::text()]'
+                         ' and .//text:p[@text:style-name="P9"]'
+                            '[descendant::text()]')
 
     def test_negated_template_predicate(self):
-        """Test negation of xpaths using the default text settings."""
+        """Test negation of xpaths using the default text settings.
+        
+        Note that unlike the field_predicate_xpath function,
+        the template system uses the 'descendant' axis by default.
+        """
         self.assertEqual(ls.template_xpath('{name} and {price}',
                                            negations=('name',)),
-                         'not(.//text:p[@text:style-name="P10"][text()])'
-                         ' and .//text:p[@text:style-name="P9"][text()]')
+                         'not(.//text:p[@text:style-name="P10"]'
+                            '[descendant::text()])'
+                         ' and .//text:p[@text:style-name="P9"]'
+                            '[descendant::text()]')
 
     def test_template_text_control(self):
         """Test yes/no/either text filters."""
@@ -40,9 +52,11 @@ class TextXPathGeneration(unittest.TestCase):
         template = '({name} or {alternate_name}) and {price}'
         self.assertEqual(ls.template_xpath(template,
                                            with_text_map=with_text_map),
-                         '(.//text:p[@text:style-name="P10"][text()]'
+                         '(.//text:p[@text:style-name="P10"]'
+                            '[descendant::text()]'
                           ' or .//text:p[@text:style-name="P6"]'
-                         ') and .//text:p[@text:style-name="P9"][not(text())]' )
+                         ') and .//text:p[@text:style-name="P9"]'
+                            '[not(descendant::text())]' )
 
 class LXMLBaseTestClass(unittest.TestCase):
     def setUp(self):

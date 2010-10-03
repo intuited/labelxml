@@ -25,16 +25,20 @@ FIELD_XPATHS = dict((name, style_name_xpath(STYLE_NAMES[name]))
 
 ALL_XPATHS = dict(FIELD_XPATHS, frame=FRAME_XPATH, page=PAGE_XPATH)
 
-XPATH_TEXT_FMTSTRS = {'yes': '{0}[text()]',
-                      'no': '{0}[not(text())]',
-                      'either': '{0}'}
+def xpath_text_fmtstrs(axis='child'):
+    """Generates a dict of format strings for text xpaths."""
+    return {'yes': '{{0}}[{axis}::text()]'.format(axis=axis),
+            'no': '{{0}}[not({axis}::text())]'.format(axis=axis),
+            'either': '{0}'}
 
-XPATH_TEXT_FORMATS = dict((key, fmtstr.format)
-                          for key, fmtstr in XPATH_TEXT_FMTSTRS.iteritems())
+def xpath_text_formats(axis='child'):
+    """Generates a dict of formatters for text xpaths."""
+    return dict((key, fmtstr.format)
+                for key, fmtstr in xpath_text_fmtstrs(axis).iteritems())
 
 
 def _yes_no_text(require_text, xpath,
-                 formats=XPATH_TEXT_FORMATS):
+                 formats=xpath_text_formats()):
     """Modify an xpath to filter or not for the presence of text."""
     return formats[require_text](xpath)
 
@@ -43,7 +47,7 @@ def requires_text(with_text_map, field, default):
     return with_text_map.get(field, default)
 
 def xpath_wrap_text(with_text_map, default, xpath_id, xpath,
-                    formats=XPATH_TEXT_FORMATS):
+                    formats=xpath_text_formats()):
     """Wrap an xpath to restrict it based on the presence/absence of inner text.
 
     ``with_text_map`` maps xpath-identifiers to yes/no/either strings.
@@ -186,6 +190,7 @@ def frame_data(frame):
 def template_xpath(template,
                    with_text_map=dict((k, 'yes') for k in STYLE_NAMES.keys()),
                    with_text_default='either',
+                   text_axis='descendant',
                    axis_map=dict((k, './/') for k in STYLE_NAMES.keys()),
                    axis_default='',
                    negations=(),
@@ -204,7 +209,8 @@ def template_xpath(template,
 
     For each xpath-id in ``negations``, the substituted xpath will be negated.
     """
-    wrap_text = partial(xpath_wrap_text, with_text_map, with_text_default)
+    wrap_text = partial(xpath_wrap_text, with_text_map, with_text_default,
+                        formats=xpath_text_formats(text_axis))
     negate = partial(negate_field_condition, negations)
     id_axis = lambda xpath_id: axis_map.get(xpath_id, axis_default)
     def process_xpath(field, xpath):
@@ -221,8 +227,13 @@ minimal_template_expansion = partial(template_xpath,
 
 
 frame_predicate_fmtstr = '//{frame}[{{predicate}}]'
-format_frame_xpath = minimal_template_expansion(frame_predicate_fmtstr).format
+def format_frame_xpath(predicate):
+    """Generate an xpath from a frame-context predicate.
 
+    This is used to process the --frame-template argument.
+    """
+    return minimal_template_expansion(frame_predicate_fmtstr
+                                      ).format(predicate=predicate)
 
 
 def main():
@@ -275,7 +286,6 @@ def main():
             group.add_argument(*args, **kwargs)
             args, kwargs = field_text_args(field)
             group.add_argument(*args, **kwargs)
-
     add_field_args(parser, FIELD_NAMES)
 
     parser.add_argument(
@@ -287,7 +297,10 @@ def main():
              '\n\n'
              'If this option is given, the FIELD OPTIONS will be ignored.',
         default=None,
-        type=template_xpath,
+        # The ``template`` attrib is a function that takes the text axis.
+        # Here we curry the template_xpath function
+        #   so that it can accept the parse-time argument separately.
+        type=lambda fmtstr: partial(template_xpath, fmtstr)
         )
     parser.add_argument(
         '-f', '--frame-template',
@@ -297,7 +310,19 @@ def main():
              .format(frame_predicate_fmtstr),
         default=None,
         dest='template',
-        type=lambda ft: format_frame_xpath(predicate=template_xpath(ft))
+        # This one is a bit more complex
+        #   because we need to inject the args into the inner function.
+        type=(lambda fmtstr:
+                     (lambda *args, **kwargs:
+                             format_frame_xpath(template_xpath(fmtstr, *args,
+                                                               **kwargs))))
+        )
+
+    parser.add_argument(
+        '-a', '--text-axis',
+        help='The xpath axis to use when checking for text content.',
+        default='child',
+        choices=('child', 'descendant'),
         )
 
     def add_output_args(parser):
@@ -317,7 +342,7 @@ def main():
             dest='format',
             )
         group.add_argument(
-            '-x', '--xpath',
+            '-x', '--output-xpath',
             help='Output the generated xpath.',
             action='store_true',
             )
@@ -328,16 +353,17 @@ def main():
     root = etree.parse(ns.content_file).getroot()
 
     if ns.template:
-        xpath = ns.template
+        xpath = ns.template(text_axis=ns.text_axis)
     else:
         xpath = build_frame_xpath(*build_select_args(ns, FIELD_NAMES))
 
-    if ns.xpath:
+    if ns.output_xpath:
         print xpath
     else:
         frames = root.xpath(xpath, namespaces=root.nsmap)
 
         frames = root.xpath(xpath, namespaces=root.nsmap)
+        # TODO: deal with empty result sets
         data = tuple(frame_data(frame) for frame in frames)
         
         print ns.format(data)
