@@ -25,9 +25,20 @@ class TestXPathValidity(LXMLBaseTestClass):
 
 class TestElementCounts(LXMLBaseTestClass):
     def test_draw_frame_count(self):
+        """Test that lxml's count agrees with that of tidy | grep | wc.
+
+        This is mostly just a sanity check on the xpath,
+        since obviously lxml is reliable.
+        """
         self.assertEqual(len(ls.draw_frames(self.root)),
                          169)
     def test_product_name_count(self):
+        """Check the count of the number of product name fields containing text.
+
+        The expected counts for this and the other product/price count tests
+        are just regression tests,
+        i.e. the expected counts were gleaned from the test data.
+        """
         self.assertEqual(len(ls.product_names(self.root)),
                          115)
     def test_product_price_count(self):
