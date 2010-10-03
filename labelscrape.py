@@ -56,20 +56,45 @@ def product_prices(root, with_text='yes'):
     return descendant_fields('price', with_text, root)
 
 
-def field_predicate_xpath(with_text_seq=('yes', 'yes'),
-                          field_names=_field_names):
+def field_predicate_xpath(with_text={'name': 'yes', 'price': 'yes'},
+                          field_names=_field_names,
+                          negations=()):
     """Generates an xpath for field predicates.
 
-    The elements of ``with_text_seq``
+    The elements of ``select_seq`` select, negate, 
+
+    If ``with_text`` is a dict, its elements
     determine how the fields are filtered
     based on the presence of text within them.
+
+    It will default to 'yes' for any ungiven elements.
+
+    If it is a string, that string is used for all fields.
+
+    `negations` is a sequence of field names;
+    if a field is negated, its absence will be searched for.
     """
-    conditions = (_yes_no_text(wt, _field_xpaths[field])
-                  for wt, field in zip(with_text_seq, field_names))
+    (with_text,
+     with_text_default) = (({}, with_text) if isinstance(with_text, basestring)
+                           else (with_text, 'yes'))
+
+    def condition(field_name):
+        return _yes_no_text(with_text.get(field_name, with_text_default),
+                            _field_xpaths[field_name])
+
+    def negate(condition, field):
+        if hasattr(negations, field):
+            return 'not({0})'.format(condition)
+        return condition
+
+    conditions = (negate(condition(field_name), field_name)
+                  for field_name in field_names)
+
     descendant_conditions = ('.//' + condition for condition in conditions)
+
     return ' and '.join(descendant_conditions)
 
-def draw_frames_with_names_and_prices(root, with_text=('yes', 'yes')):
+def draw_frames_with_names_and_prices(root, with_text='yes'):
     predicate = field_predicate_xpath(with_text)
 
     xpath = './/{0}[{1}]'.format(_frame_xpath, predicate)
@@ -102,7 +127,8 @@ def main():
 
     parser.add_argument(
         '--name',
-        help='Enable/disable filtering on the presence of a name field.'
+        help='Enable/disable filtering on the presence of a name field.',
+        default='yes',
         )
 
     ns = parser.parse()
