@@ -21,6 +21,29 @@ class TextXPathGeneration(unittest.TestCase):
                          './/text:p[@text:style-name="P10"][text()] '
                          'and not(.//text:p[@text:style-name="P9"][text()])')
 
+    def test_template_predicate(self):
+        self.assertEqual(ls.template_xpath('{name} and {price}'),
+                         './/text:p[@text:style-name="P10"][text()]'
+                         ' and .//text:p[@text:style-name="P9"][text()]')
+
+    def test_negated_template_predicate(self):
+        """Test negation of xpaths using the default text settings."""
+        self.assertEqual(ls.template_xpath('{name} and {price}',
+                                           negations=('name',)),
+                         'not(.//text:p[@text:style-name="P10"][text()])'
+                         ' and .//text:p[@text:style-name="P9"][text()]')
+
+    def test_template_text_control(self):
+        """Test yes/no/either text filters."""
+        with_text_map = {'name': 'yes', 'price': 'no',
+                         'alternate_name': 'either'}
+        template = '({name} or {alternate_name}) and {price}'
+        self.assertEqual(ls.template_xpath(template,
+                                           with_text_map=with_text_map),
+                         '(.//text:p[@text:style-name="P10"][text()]'
+                          ' or .//text:p[@text:style-name="P6"]'
+                         ') and .//text:p[@text:style-name="P9"][not(text())]' )
+
 class LXMLBaseTestClass(unittest.TestCase):
     def setUp(self):
         from lxml import etree
