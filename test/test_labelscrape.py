@@ -24,6 +24,9 @@ class TestXPathValidity(LXMLBaseTestClass):
         self.assertTrue(len(ls.product_prices(self.root)))
 
 class TestElementCounts(LXMLBaseTestClass):
+    def test_draw_frame_count(self):
+        self.assertEqual(len(ls.draw_frames(self.root)),
+                         169)
     def test_product_name_count(self):
         self.assertEqual(len(ls.product_names(self.root)),
                          115)
