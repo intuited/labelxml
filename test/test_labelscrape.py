@@ -86,7 +86,7 @@ class TestElementCounts(LXMLBaseTestClass):
 
     def test_drawframes_with_products_and_prices(self):
         """All draw frame elements which have textual prices and products."""
-        dfs = ls.draw_frames_with_names_and_prices(self.root)
+        dfs = ls.select_frames(self.root)
         self.assertEqual(len(tuple(dfs)),
                          104)
 

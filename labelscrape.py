@@ -94,28 +94,61 @@ def field_predicate_xpath(with_text={'name': 'yes', 'price': 'yes'},
 
     return ' and '.join(descendant_conditions)
 
-def draw_frames_with_names_and_prices(root, with_text='yes'):
-    predicate = field_predicate_xpath(with_text)
+
+def select_frames(root, with_text='yes',
+                        field_names=_field_names,
+                        negations=()):
+    """Returns draw:frame elements which match the criteria.
+
+    The parameters are described in the docstring for
+    ``field_predicate_xpath``.
+    """
+    predicate = field_predicate_xpath(with_text, field_names, negations)
 
     xpath = './/{0}[{1}]'.format(_frame_xpath, predicate)
 
     return root.xpath(xpath, namespaces=root.nsmap)
 
 
+def build_select_args(ns, field_names):
+    """Builds parameters for ``select_frames``."""
+    field_name_actions = ((field_name, getattr(ns, field_name))
+                          for field_name in field_names)
+
+    negations = []
+    selected_fields = []
+    for field_name in field_names:
+        action = getattr(ns, field_name)
+        if action != 'either':
+            selected_fields.append(field_name)
+        if action == 'no':
+            negations.append(field_name)
+
+    with_text = dict((field_name, getattr(ns, field_name + '_text'))
+                     for field_name in field_names)
+
+    return with_text, selected_fields, negations
+
 
 ##__  dragons
 
-def _first_or_none(seq):
-    return seq[0] if len(seq) else None
+def _first_text_or_none(seq):
+    return seq[0].text if len(seq) else None
 
-def draw_frame_data(draw_frame):
-    return {'name': _first_or_none(product_names(draw_frame)),
-            'prices': _first_or_none(product_prices(draw_frame))}
+def frame_data(frame):
+    return {'name': _first_text_or_none(product_names(frame)),
+            'price': _first_text_or_none(product_prices(frame))}
 
 
 def main():
+    from pprint import PrettyPrinter
+    import json
     parser = argparse.ArgumentParser(
         description="Scrape data from the grainery's .odt-format label database.",
+        )
+
+    parser.set_defaults(
+        format=PrettyPrinter(indent=2).pformat
         )
 
     parser.add_argument(
@@ -124,11 +157,58 @@ def main():
              "Normally this will be found as the top-level file ``content.xml`` "
              "after unzipping the .odt file."
         )
-
     parser.add_argument(
         '--name',
-        help='Enable/disable filtering on the presence of a name field.',
+        help='Control filtering on the presence of a name field.',
         default='yes',
+        choices=('yes', 'no', 'either'),
+        )
+    parser.add_argument(
+        '--name-text',
+        help='Determines whether the presence/absence of text'
+             ' within a name field is required.',
+        default='yes',
+        choices=_xpath_text_additions.keys(),
+        )
+    parser.add_argument(
+        '--price',
+        help='Control filtering on the presence of a price field.',
+        default='yes',
+        choices=('yes', 'no', 'either'),
+        )
+    parser.add_argument(
+        '--price-text',
+        help='Determines whether the presence/absence of text'
+             ' within a price field is required.',
+        default='yes',
+        choices=_xpath_text_additions.keys(),
         )
 
-    ns = parser.parse()
+    parser.add_argument(
+        '-j', '--json',
+        help='Output in JSON format.',
+        action='store_const',
+        const=partial(json.dumps, indent=2),
+        dest='format',
+        )
+    parser.add_argument(
+        '-c', '--count',
+        help='Output the element count instead of their content.',
+        action='store_const',
+        const=len,
+        dest='format',
+        )
+
+    ns = parser.parse_args()
+
+    root = etree.parse(ns.content_file).getroot()
+
+    frames = select_frames(root, *build_select_args(ns, _field_names))
+
+    data = tuple(frame_data(frame) for frame in frames)
+    
+    print ns.format(data)
+
+
+if __name__ == '__main__':
+    exit(main())
