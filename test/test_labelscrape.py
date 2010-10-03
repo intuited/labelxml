@@ -11,6 +11,7 @@ DATA_FILE = data_file(__file__)
 
 class TextXPathGeneration(unittest.TestCase):
     def test_field_predicate(self):
+        """Test the default constructed field predicate."""
         self.assertEqual(ls.field_predicate_xpath(),
                          './/text:p[@text:style-name="P10"][text()]'
                          ' and .//text:p[@text:style-name="P9"][text()]')

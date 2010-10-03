@@ -56,10 +56,18 @@ def product_prices(root, with_text='yes'):
     return descendant_fields('price', with_text, root)
 
 
-def field_predicate_xpath(with_text_seq=('yes', 'yes')):
-    conditions = [_yes_no_text(wt, _field_xpaths[field])
-                  for wt, field in zip(with_text_seq, _field_names)]
-    return './/{0} and .//{1}'.format(*conditions)
+def field_predicate_xpath(with_text_seq=('yes', 'yes'),
+                          field_names=_field_names):
+    """Generates an xpath for field predicates.
+
+    The elements of ``with_text_seq``
+    determine how the fields are filtered
+    based on the presence of text within them.
+    """
+    conditions = (_yes_no_text(wt, _field_xpaths[field])
+                  for wt, field in zip(with_text_seq, field_names))
+    descendant_conditions = ('.//' + condition for condition in conditions)
+    return ' and '.join(descendant_conditions)
 
 def draw_frames_with_names_and_prices(root, with_text=('yes', 'yes')):
     predicate = field_predicate_xpath(with_text)
