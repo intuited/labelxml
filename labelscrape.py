@@ -4,6 +4,7 @@ from lxml import etree
 from functools import partial
 
 _frame_xpath = 'draw:frame'
+_page_xpath = '@text:anchor-page-number'
 
 def draw_frames(root):
     return root.xpath('.//' + _frame_xpath, namespaces=root.nsmap)
@@ -98,8 +99,6 @@ def field_predicate_xpath(with_text={'name': 'yes', 'price': 'yes'},
 
     predicate = ' and '.join(negated_conditions)
 
-    print predicate
-
     return predicate
 
 
@@ -143,8 +142,13 @@ def build_select_args(ns, field_names):
 def _first_text_or_none(seq):
     return seq[0].text if len(seq) else None
 
+def _first_or_none(seq):
+    return seq[0] if seq else None
+
 def frame_data(frame):
-    return {'name': _first_text_or_none(product_names(frame)),
+    return {'page': _first_or_none(frame.xpath(_page_xpath,
+                                   namespaces=frame.nsmap)),
+            'name': _first_text_or_none(product_names(frame)),
             'price': _first_text_or_none(product_prices(frame))}
 
 
