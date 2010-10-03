@@ -5,11 +5,25 @@ from lxml import etree
 def draw_frames(root):
     return root.xpath('//draw:frame', namespaces=root.nsmap)
 
-def product_names(root):
-    return root.xpath('//text:p[@text:style-name="P10"]', namespaces=root.nsmap)
+def product_names(root, with_text=True):
+    """Return product names under the root.
 
-def product_prices(root):
-    return root.xpath('//text:p[@text:style-name="P9"]', namespaces=root.nsmap)
+    If with_text is untrue, return even those product names which have no text.
+    """
+    xpath = '//text:p[@text:style-name="P10"]'
+    if with_text:
+        xpath += '[text()]'
+    return root.xpath(xpath, namespaces=root.nsmap)
+
+def product_prices(root, with_text=True):
+    """Return product prices under the root.
+
+    If with_text is untrue, return even those product prices which have no text.
+    """
+    xpath = '//text:p[@text:style-name="P9"]'
+    if with_text:
+        xpath += '[text()]'
+    return root.xpath(xpath, namespaces=root.nsmap)
 
 sample_page = """\
     <draw:frame draw:style-name="fr1" draw:name="Frame58" text:anchor-type="page" text:anchor-page-number="115" svg:x="0.799cm"
