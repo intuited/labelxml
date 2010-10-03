@@ -25,7 +25,6 @@ FIELD_XPATHS = dict((name, style_name_xpath(STYLE_NAMES[name]))
 
 ALL_XPATHS = dict(FIELD_XPATHS, frame=FRAME_XPATH, page=PAGE_XPATH)
 
-
 XPATH_TEXT_FMTSTRS = {'yes': '{0}[text()]',
                       'no': '{0}[not(text())]',
                       'either': '{0}'}
@@ -189,7 +188,7 @@ def template_xpath(template,
                    with_text_default='either',
                    axis_map=dict((k, './/') for k in STYLE_NAMES.keys()),
                    axis_default='',
-                   negations=()
+                   negations=(),
                    ):
     """Generate an xpath from the template.
 
@@ -216,6 +215,13 @@ def template_xpath(template,
     xpaths = dict((field, process_xpath(field, xpath))
                   for field, xpath in ALL_XPATHS.iteritems())
     return template.format(**xpaths)
+
+minimal_template_expansion = partial(template_xpath,
+                                     with_text_map={}, axis_map={})
+
+
+frame_predicate_fmtstr = '//{frame}[{{predicate}}]'
+format_frame_xpath = minimal_template_expansion(frame_predicate_fmtstr).format
 
 
 
@@ -281,6 +287,17 @@ def main():
              '\n\n'
              'If this option is given, the FIELD OPTIONS will be ignored.',
         default=None,
+        type=template_xpath,
+        )
+    parser.add_argument(
+        '-f', '--frame-template',
+        help='Use the template to generate an xpath predicate'
+             ' which is applied to the set of all frames.'
+             'This is equivalent to passing `{0}` as the --template.'
+             .format(frame_predicate_fmtstr),
+        default=None,
+        dest='template',
+        type=lambda ft: format_frame_xpath(predicate=template_xpath(ft))
         )
 
     def add_output_args(parser):
@@ -311,7 +328,7 @@ def main():
     root = etree.parse(ns.content_file).getroot()
 
     if ns.template:
-        xpath = template_xpath(ns.template)
+        xpath = ns.template
     else:
         xpath = build_frame_xpath(*build_select_args(ns, FIELD_NAMES))
 
