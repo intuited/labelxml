@@ -83,16 +83,24 @@ def field_predicate_xpath(with_text={'name': 'yes', 'price': 'yes'},
                             _field_xpaths[field_name])
 
     def negate(condition, field):
-        if hasattr(negations, field):
+        if field in negations:
             return 'not({0})'.format(condition)
         return condition
 
-    conditions = (negate(condition(field_name), field_name)
+    conditions = (condition(field_name)
                   for field_name in field_names)
 
     descendant_conditions = ('.//' + condition for condition in conditions)
 
-    return ' and '.join(descendant_conditions)
+    negated_conditions = (negate(condition, field_name)
+                          for condition, field_name
+                              in zip(descendant_conditions, field_names))
+
+    predicate = ' and '.join(negated_conditions)
+
+    print predicate
+
+    return predicate
 
 
 def select_frames(root, with_text='yes',

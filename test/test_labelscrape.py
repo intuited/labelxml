@@ -16,6 +16,11 @@ class TextXPathGeneration(unittest.TestCase):
                          './/text:p[@text:style-name="P10"][text()]'
                          ' and .//text:p[@text:style-name="P9"][text()]')
 
+    def test_negated_predicates(self):
+        self.assertEqual(ls.field_predicate_xpath(negations=('price')),
+                         './/text:p[@text:style-name="P10"][text()] '
+                         'and not(.//text:p[@text:style-name="P9"][text()])')
+
 class LXMLBaseTestClass(unittest.TestCase):
     def setUp(self):
         from lxml import etree
@@ -89,6 +94,11 @@ class TestElementCounts(LXMLBaseTestClass):
         dfs = ls.select_frames(self.root)
         self.assertEqual(len(tuple(dfs)),
                          104)
+
+    def test_frames_with_names_and_no_prices(self):
+        frames = ls.select_frames(self.root, negations=('price'))
+        self.assertEqual(len(tuple(frames)),
+                         3)
 
 
 if __name__ == '__main__':
