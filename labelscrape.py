@@ -238,6 +238,8 @@ def main():
         )
 
     def add_field_args(parser, field_names):
+        group = parser.add_argument_group('FIELD OPTIONS')
+
         def optfmt(field):
             """Format an option name for the ``field``."""
             field = field.replace('_', '-')
@@ -259,44 +261,50 @@ def main():
             return ((optfmt(field) + '-text',),
                 {'help': helpfmt(field),
                  'default': 'yes',
-                 'choices': XPATH_TEXT_ADDITIONS.keys(),
+                 'choices': ('yes', 'no', 'either'),
                 })
 
         for field in field_names:
             args, kwargs = field_args(field)
-            parser.add_argument(*args, **kwargs)
+            group.add_argument(*args, **kwargs)
             args, kwargs = field_text_args(field)
-            parser.add_argument(*args, **kwargs)
+            group.add_argument(*args, **kwargs)
 
     add_field_args(parser, FIELD_NAMES)
 
     parser.add_argument(
         '-t', '--template',
+        # TODO: add a list of template replacement fields.
         help='Build the xpath query from a template'
              ' instead of using --name, --name-text, etc.  '
-             'The xpath will be used as a predicate to select from the frames.',
+             'The xpath will be used as a predicate to select from the frames.'
+             '\n\n'
+             'If this option is given, the FIELD OPTIONS will be ignored.',
         default=None,
         )
 
-    parser.add_argument(
-        '-j', '--json',
-        help='Output in JSON format.',
-        action='store_const',
-        const=partial(json.dumps, indent=2),
-        dest='format',
-        )
-    parser.add_argument(
-        '-c', '--count',
-        help='Output the element count instead of their content.',
-        action='store_const',
-        const=len,
-        dest='format',
-        )
-    parser.add_argument(
-        '-x', '--xpath',
-        help='Output the generated xpath.  Only works for templates, for now.',
-        action='store_true',
-        )
+    def add_output_args(parser):
+        group = parser.add_argument_group('Mutually-exclusive OUTPUT OPTIONS')
+        group.add_argument(
+            '-j', '--json',
+            help='Output in JSON format.',
+            action='store_const',
+            const=partial(json.dumps, indent=2),
+            dest='format',
+            )
+        group.add_argument(
+            '-c', '--count',
+            help='Output the number of elements instead of their content.',
+            action='store_const',
+            const=len,
+            dest='format',
+            )
+        group.add_argument(
+            '-x', '--xpath',
+            help='Output the generated xpath.',
+            action='store_true',
+            )
+    add_output_args(parser)
 
     ns = parser.parse_args()
 
