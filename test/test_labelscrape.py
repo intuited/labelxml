@@ -137,6 +137,27 @@ class TestElementCounts(LXMLBaseTestClass):
         self.assertEqual(len(tuple(frames)),
                          3)
 
+class TestEdgeCases(LXMLBaseTestClass):
+    def test_alternative_names(self):
+        """Labels which consist of two parts have a different style attribute.
+
+        The P6 ("alternative_name") style is one alternate style.
+
+        In such cases, the node with that style does not directly contain text;
+        its contained elements do.
+
+        Page 297 contains one such element.
+        """
+        page297 = self.root.xpath(
+            ls.template_xpath('//draw:frame[@text:anchor-page-number="297"]'),
+            namespaces=self.root.nsmap)
+        self.assertEqual(len(page297), 1)
+        descentext = ls.xpath_text_formats('descendant')
+        self.assertEqual(
+            ls.frame_data(page297[0], text_formats=descentext)['name'],
+            "Spelt Bran Bread")
+
+
 
 if __name__ == '__main__':
     unittest.main()

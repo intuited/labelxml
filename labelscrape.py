@@ -60,18 +60,30 @@ def xpath_wrap_text(with_text_map, default, xpath_id, xpath,
                         xpath, formats=formats)
 
 
-def descendant_fields(field, with_text, root):
-    text_filter = partial(_yes_no_text, with_text)
+def descendant_fields(field, with_text, root,
+                      text_formats=xpath_text_formats()):
+    # TODO: this is weird.
+    text_filter = partial(_yes_no_text, with_text, formats=text_formats)
     xpath = './/' + text_filter(FIELD_XPATHS[field])
+    print 'descendant_fields xpath: {0}',format(xpath)
+    print 'root: {0}'.format(root)
     return root.xpath(xpath, namespaces=root.nsmap)
 
-
-def product_names(root, with_text='yes'):
+from deboogie import null_tracewrap
+def trace_textformat(args):
+    text_formats = args[2][1].get('text_formats', None)
+    if not text_formats:
+        return
+    selves = ((k, getattr(f, '__self__', None))
+              for k, f in text_formats.iteritems())
+    return tuple(selves)
+@null_tracewrap(infmt=trace_textformat)
+def product_names(root, with_text='yes', text_formats=xpath_text_formats()):
     """Return product names under the root.
 
     ``text_filter`` is applied to the xpath.
     """
-    return descendant_fields('name', with_text, root)
+    return descendant_fields('name', with_text, root, text_formats=text_formats)
 
 def product_prices(root, with_text='yes'):
     """Return product prices under the root.
@@ -180,10 +192,11 @@ def _first_or_none(seq):
     return seq[0] if seq else None
 
 
-def frame_data(frame):
+def frame_data(frame, text_formats=xpath_text_formats()):
     return {'page': _first_or_none(frame.xpath(PAGE_XPATH,
                                    namespaces=frame.nsmap)),
-            'name': _first_text_or_none(product_names(frame)),
+            'name': _first_text_or_none(product_names(frame,
+                                        text_formats=text_formats)),
             'price': _first_text_or_none(product_prices(frame))}
 
 
@@ -364,7 +377,9 @@ def main():
 
         frames = root.xpath(xpath, namespaces=root.nsmap)
         # TODO: deal with empty result sets
-        data = tuple(frame_data(frame) for frame in frames)
+        text_formats = xpath_text_formats(ns.text_axis)
+        data = tuple(frame_data(frame, text_formats=text_formats)
+                     for frame in frames)
         
         print ns.format(data)
 
