@@ -1,6 +1,6 @@
-"""Test suite for the labelscrape script."""
+"""Test suite for the labelxml script."""
 import unittest
-import labelscrape as ls
+import labelxml as ls
 
 def data_file(scriptfile):
     from os.path import join, abspath, dirname
@@ -163,16 +163,33 @@ class TestPage297(LXMLBaseTestClass):
         """
         descentext = ls.xpath_text_formats('descendant')
         self.assertEqual(
-            ls.frame_data(self.page[0], text_formats=descentext)['name'],
+            ls.frame_data(self.page[0],
+                          text_formats=descentext)['name'],
             "Spelt Bran Bread")
 
     def test_descendant_or_self(self):
         """Try to read the name on page 297 with the descendant-or-self axis."""
         descentext = ls.xpath_text_formats('descendant-or-self')
         self.assertEqual(
-            ls.frame_data(self.page[0], text_formats=descentext)['name'],
+            ls.frame_data(self.page[0],
+                          text_formats=descentext)['name'],
             "Spelt Bran Bread")
 
+    def test_child(self):
+        """This one shouldn't work."""
+        tf = ls.xpath_text_formats('child')
+        self.assertEqual(
+            ls.frame_data(self.page[0],
+                          text_formats=tf)['name'],
+            "Spelt Bran Bread")
+
+
+def suite():
+    from unittest import defaultTestLoader, TestCase, TestSuite
+    load = defaultTestLoader.loadTestsFromTestCase
+    cases = (g for g in globals().values()
+               if type(g) == type and issubclass(g, TestCase))
+    return TestSuite(load(c) for c in cases)
 
 if __name__ == '__main__':
     unittest.main()
