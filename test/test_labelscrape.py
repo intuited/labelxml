@@ -137,8 +137,18 @@ class TestElementCounts(LXMLBaseTestClass):
         self.assertEqual(len(tuple(frames)),
                          3)
 
-class TestEdgeCases(LXMLBaseTestClass):
-    def test_alternative_names(self):
+class TestPage297(LXMLBaseTestClass):
+    def setUp(self):
+        super(TestPage297, self).setUp()
+        self.page = self.root.xpath(
+            ls.template_xpath('//draw:frame[@text:anchor-page-number="297"]'),
+            namespaces=self.root.nsmap)
+
+    def test_page_count(self):
+        """There can be only one page 297."""
+        self.assertEqual(len(self.page), 1)
+
+    def test_descendant(self):
         """Labels which consist of two parts have a different style attribute.
 
         The P6 ("alternative_name") style is one alternate style.
@@ -147,16 +157,21 @@ class TestEdgeCases(LXMLBaseTestClass):
         its contained elements do.
 
         Page 297 contains one such element.
+
+        This test tests reading of its name with the 'descendant' axis
+        being used to locate text nodes within the label node.
         """
-        page297 = self.root.xpath(
-            ls.template_xpath('//draw:frame[@text:anchor-page-number="297"]'),
-            namespaces=self.root.nsmap)
-        self.assertEqual(len(page297), 1)
         descentext = ls.xpath_text_formats('descendant')
         self.assertEqual(
-            ls.frame_data(page297[0], text_formats=descentext)['name'],
+            ls.frame_data(self.page[0], text_formats=descentext)['name'],
             "Spelt Bran Bread")
 
+    def test_descendant_or_self(self):
+        """Try to read the name on page 297 with the descendant-or-self axis."""
+        descentext = ls.xpath_text_formats('descendant-or-self')
+        self.assertEqual(
+            ls.frame_data(self.page[0], text_formats=descentext)['name'],
+            "Spelt Bran Bread")
 
 
 if __name__ == '__main__':
