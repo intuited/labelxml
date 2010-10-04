@@ -181,7 +181,7 @@ class TestPage297(LXMLBaseTestClass):
         self.assertEqual(
             ls.frame_data(self.page[0],
                           text_formats=tf)['name'],
-            "Spelt Bran Bread")
+            None)
 
 
 def suite():
