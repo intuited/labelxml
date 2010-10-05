@@ -1,4 +1,4 @@
-"""Scriptificationality for the labelxml module.
+"""CLI for the labelxml module.
 
 Provides a command-line interface to the label data extractor.
 """
