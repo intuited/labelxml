@@ -31,9 +31,9 @@ paths = (
                     ' and descendant::{price}[descendant-or-self::text()]]'
         .format(**styles.nodetests))),
     XP('frames with names and prices with text content',
-       ('//draw:frame[(descendant::{name_1}[descendant-or-self::string()]'
-                      ' or descendant::{name_2}[descendant-or-self::string()])'
-                    ' and descendant::{price}[descendant-or-self::string()]]'
+       ('//draw:frame[(descendant::{name_1}[descendant-or-self::*[string()]]'
+                      ' or descendant::{name_2}[descendant-or-self::*[string()]])'
+                    ' and descendant::{price}[descendant-or-self::*[string()]]]'
         .format(**styles.nodetests))),
     )
 
