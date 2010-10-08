@@ -5,11 +5,13 @@ Provides a command-line interface to the label data extractor.
 
 def print_stats(tree):
     from pprint import pprint
-    import stats
-    stats = stats.all_path_stats(tree)
-    ##~~  pprint(tuple(stats))
-    for stat in stats:
-        pprint(stat)
+    import stats, paths
+    results = tuple(stats.all_path_stats(tree))
+    for result in results:
+        pprint(result)
+    missing_text_content = stats.PathStats(tree, paths.all_frames, paths.paths[3])
+    pprint([(frame, frame.xpath('string()'))
+            for frame in missing_text_content.missing_text_content_frames])
 
 def main():
     import argparse
