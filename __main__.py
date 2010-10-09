@@ -9,9 +9,11 @@ import paths
 def print_stats(tree, options):
     from pprint import pprint
     import report
-    kwargs = dict((attr, getattr(options, attr))
-                  for attr in ('base_name', 'path_names')
-                  if hasattr(options, attr))
+    kwargs = {}
+    if hasattr(options, 'path_names'):
+        kwargs.update(path_names=options.path_names)
+    if hasattr(options, 'base'):
+        kwargs.update(base_name=options.base)
     results = report.all_path_stats(tree, **kwargs)
     for result in results:
         pprint(result)
