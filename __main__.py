@@ -55,7 +55,10 @@ def add_stats_command(subparsers, path_names):
 def add_diff_command(subparsers, path_names):
     parser = subparsers.add_parser(
         'diff',
-        help='Show frames found in the base frameset but not in the comparison frameset(s).',
+        help=('Show frames found in the base frameset'
+              ' but not in the comparison frameset(s).  '
+              'This option outputs (xpath, page-number, text-content) tuples'
+              ' for each differing frame.'),
         )
     add_comparison_args(parser, path_names)
     parser.set_defaults(action=print_diff)

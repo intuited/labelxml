@@ -1,5 +1,6 @@
 import paths
 import stats
+import styles
 def identity(x): return x
 
 def base_report_data(report_data):
@@ -53,4 +54,6 @@ def all_path_stats(tree, base_name='all_frames',
 
 def diff_report(tree, frame):
     """Returns diff report data for the frame."""
-    return (tree.getpath(frame), frame.xpath('string()'))
+    return (tree.getpath(frame),
+            frame.xpath(styles.page_number_relpath, namespaces=frame.nsmap),
+            frame.xpath('string()', namespaces=frame.nsmap))

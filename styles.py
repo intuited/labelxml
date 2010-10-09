@@ -12,3 +12,6 @@ def nodetest(style):
 
 nodetests = dict((style, nodetest(style))
                     for style in names.keys())
+
+# A path relative to a page frame giving that page's page number.
+page_number_relpath = '@text:anchor-page-number'
