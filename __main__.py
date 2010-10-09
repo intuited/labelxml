@@ -3,6 +3,7 @@
 Provides a command-line interface to the label data extractor.
 """
 import paths
+import argparse
 
 # Various data dumpers
 
@@ -45,6 +46,16 @@ def print_dump(tree, options):
 
 # Argument parser components
 
+def add_file_arg(parser):
+    parser.add_argument(
+        'file',
+        type=argparse.FileType('r'),
+        help=('The XML content file. '
+              'This can be found in the root directory'
+              ' of an unzipped labels .odt file'
+              ' as ``content.xml``.')
+        )
+
 def add_comparison_args(parser, path_names):
     """Add common arguments for comparison actions to their parsers."""
     parser.add_argument(
@@ -63,7 +74,6 @@ def add_comparison_args(parser, path_names):
         metavar='PATH_NAME',
         )
 
-
 # Commands
 
 def add_stats_command(subparsers, path_names):
@@ -71,6 +81,7 @@ def add_stats_command(subparsers, path_names):
         'stats',
         help='Get statistics comparing the frames selected by the chosen path(s) with those selected by the base path.',
         )
+    add_file_arg(parser)
     add_comparison_args(parser, path_names)
     parser.set_defaults(action=print_stats)
 
@@ -82,6 +93,7 @@ def add_diff_command(subparsers, path_names):
               'This option outputs (xpath, page-number, text-content) tuples'
               ' for each differing frame.'),
         )
+    add_file_arg(parser)
     add_comparison_args(parser, path_names)
     parser.set_defaults(action=print_diff)
 
@@ -100,6 +112,7 @@ def add_dump_command(subparsers, path_names):
         'dump',
         help=('Dump the dataset for the named xpath.'),
         )
+    add_file_arg(parser)
     parser.add_argument(
         '-n', '--path-name',
         help=('The name of the xpath whose data will be dumped.  '
@@ -113,9 +126,9 @@ def add_dump_command(subparsers, path_names):
         '-o', '--output-format',
         help=('The format of the dumped data.  '
               'Output CSV data will be in Excel tab-delimited format'
-              ' with a header row.'
+              ' with a header row.  '
               "Defaults to '%(default)s'."),
-        default='json',
+        default='csv',
         choices=dump.dumpers.keys(),
         )
     parser.set_defaults(action=print_dump)
@@ -143,13 +156,6 @@ def main():
             " in order to determine the correct query"
             " with which to retrieve price data from the `content.xml` file.  "
             "This utility can also be used to retrieve the data."),
-        )
-    parser.add_argument(
-        'file',
-        type=argparse.FileType('r'),
-        help=('The XML content file. '
-              'This can be found in the root directory'
-              ' of an unzipped labels .odt file.')
         )
 
     subparsers = parser.add_subparsers()
