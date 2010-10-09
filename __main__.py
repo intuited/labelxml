@@ -36,11 +36,24 @@ def print_xpaths(tree, options):
     for xpath in data:
         pprint(xpath)
 
+class DataValidationError(Exception):
+    pass
 
 def dump_json(pages):
     from json import dumps
-    dicts = [dict(page) for page in pages]
-    return dumps(dicts, indent=True)
+    dicts = (dict(page) for page in pages)
+    def process(page):
+        page_numbers = page['Page Number in .odt Source']
+        if len(page_numbers) > 1:
+            raise DataValidationError("Found more than 1 page number for page {0}."
+                                      .format(page))
+        if not page_numbers:
+            raise DataValidationError("Did not find page number for page {0}"
+                                      .format(page))
+        page['Page Number in .odt Source'] = int(page_numbers[0])
+        return page
+    processed_pages = [process(page) for page in dicts]
+    return dumps(processed_pages, indent=True)
 
 def dump_yaml(pages):
     from yaml import dump_all
