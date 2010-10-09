@@ -4,6 +4,8 @@ Provides a command-line interface to the label data extractor.
 """
 import paths
 
+# Various data dumpers
+
 def print_stats(tree, options):
     from pprint import pprint
     import report
@@ -32,7 +34,11 @@ def print_xpaths(tree, options):
     for xpath in data:
         pprint(xpath)
 
+
+# Argument parser components
+
 def add_comparison_args(parser, path_names):
+    """Add common arguments for comparison actions to their parsers."""
     parser.add_argument(
         '-b', '--base',
         help="Name of the base path for comparison.  Options: [%(choices)s]; defaults to '%(default)s'.",
@@ -50,7 +56,8 @@ def add_comparison_args(parser, path_names):
         )
 
 
-# TODO: finish this and use it
+# Commands
+
 def add_stats_command(subparsers, path_names):
     parser = subparsers.add_parser(
         'stats',
@@ -76,6 +83,9 @@ def add_xpaths_command(subparsers, path_names):
         help=('Display the available xpaths and their descriptions.'),
         )
     parser.set_defaults(action=print_xpaths)
+
+
+# Main
 
 def main():
     import argparse
