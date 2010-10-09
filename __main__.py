@@ -111,7 +111,9 @@ def add_dump_command(subparsers, path_names):
         )
     parser.add_argument(
         '-o', '--output-format',
-        help=('The format of the dumped data.'
+        help=('The format of the dumped data.  '
+              'Output CSV data will be in Excel tab-delimited format'
+              ' with a header row.'
               "Defaults to '%(default)s'."),
         default='json',
         choices=dump.dumpers.keys(),

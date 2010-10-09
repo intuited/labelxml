@@ -57,10 +57,7 @@ def dump_csv(pages, options):
         return row_dict
     dicts = (validate_row_length(row) for row in dicts)
 
-    from deboogie import iterdebug
-    ##~~  dicts = iterdebug('csv dicts', dicts)
-
-    writer = DictWriter(stdout, fields)
+    writer = DictWriter(stdout, fields, dialect='excel-tab')
     writer.writerow(dict((v, v) for v in fields))
     writer.writerows(dicts)
 
