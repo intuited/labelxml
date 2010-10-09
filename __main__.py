@@ -36,11 +36,24 @@ def print_xpaths(tree, options):
     for xpath in data:
         pprint(xpath)
 
+
+def dump_json(pages):
+    from json import dumps
+    dicts = [dict(page) for page in pages]
+    return dumps(dicts, indent=True)
+
+def dump_yaml(pages):
+    from yaml import dump_all
+    return dump_all(pages)
+
+dumpers = {'json': dump_json, 'yaml': dump_yaml}
+
 def print_dump(tree, options):
     import report, paths
-    from pprint import pprint
     xp = paths.frameset_dict[options.path_name]
-    pprint(tuple(report.frameset_content(tree, xp.results(tree))))
+    pages = report.frameset_content(tree, xp.results(tree))
+    dump = dumpers[options.output_format]
+    print dump(pages)
 
 # Argument parser components
 
@@ -87,7 +100,9 @@ def add_diff_command(subparsers, path_names):
 def add_xpaths_command(subparsers):
     parser = subparsers.add_parser(
         'xpaths',
-        help=('Display the available xpaths and their descriptions.'),
+        help=('Display the available xpaths and their descriptions.  '
+              'This is just in the form of a raw data dump.  '
+              'For practical purposes the default xpath should work fine.'),
         )
     parser.set_defaults(action=print_xpaths)
 
@@ -104,6 +119,13 @@ def add_dump_command(subparsers, path_names):
         default='prices_nonzero',
         choices=path_names,
         metavar='PATH_NAME',
+        )
+    parser.add_argument(
+        '-o', '--output-format',
+        help=('The format of the dumped data.'
+              "Defaults to '%(default)s'."),
+        default='json',
+        choices=dumpers.keys(),
         )
     parser.set_defaults(action=print_dump)
 
