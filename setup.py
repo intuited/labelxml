@@ -56,6 +56,6 @@ setup(
     packages = ['labelxml'],
     package_dir = {'labelxml': ''},
     entry_points = {
-        'console_scripts': ['labelxml = labelxml.main']
+        'console_scripts': ['labelxml = labelxml.__main__:main']
         },
     )
