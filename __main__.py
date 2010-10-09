@@ -36,6 +36,11 @@ def print_xpaths(tree, options):
     for xpath in data:
         pprint(xpath)
 
+def print_dump(tree, options):
+    import report, paths
+    from pprint import pprint
+    xp = paths.frameset_dict[options.path_name]
+    pprint(tuple(report.frameset_content(tree, xp.results(tree))))
 
 # Argument parser components
 
@@ -79,12 +84,28 @@ def add_diff_command(subparsers, path_names):
     add_comparison_args(parser, path_names)
     parser.set_defaults(action=print_diff)
 
-def add_xpaths_command(subparsers, path_names):
+def add_xpaths_command(subparsers):
     parser = subparsers.add_parser(
         'xpaths',
         help=('Display the available xpaths and their descriptions.'),
         )
     parser.set_defaults(action=print_xpaths)
+
+def add_dump_command(subparsers, path_names):
+    parser = subparsers.add_parser(
+        'dump',
+        help=('Dump the dataset for the named xpath.'),
+        )
+    parser.add_argument(
+        '-n', '--path-name',
+        help=('The name of the xpath whose data will be dumped.  '
+              "Defaults to '%(default)s';"
+              ' use the `xpaths` command for info on the options.'),
+        default='prices_nonzero',
+        choices=path_names,
+        metavar='PATH_NAME',
+        )
+    parser.set_defaults(action=print_dump)
 
 
 # Main
@@ -122,7 +143,8 @@ def main():
 
     add_stats_command(subparsers, path_names)
     add_diff_command(subparsers, path_names)
-    add_xpaths_command(subparsers, path_names)
+    add_xpaths_command(subparsers)
+    add_dump_command(subparsers, path_names)
 
     options = parser.parse_args()
 

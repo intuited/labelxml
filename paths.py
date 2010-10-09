@@ -38,7 +38,8 @@ framesets = (
                       ' or descendant::{name_2}[descendant-or-self::text()])'
                     ' and descendant::{price}[descendant-or-self::text()]]'
         .format(**styles.nodetests)),
-       desc='Frames with name- and price-styled paragraphs which have top-level text.'),
+       desc='Frames with name- and price-styled paragraphs'
+            ' which have top-level text.'),
     XP('names_prices_tcontent',
        ('//draw:frame[(descendant::{name_1}[descendant-or-self::*[string()]]'
                       ' or descendant::{name_2}[descendant-or-self::*[string()]])'
@@ -50,13 +51,19 @@ framesets = (
         .format(**styles.nodetests)),
        desc='Frames with price-styled paragraphs which contain text.'),
     XP('prices_nonzero',
-       ('//draw:frame[descendant::{price}[descendant-or-self::*[string()][not(contains(string(), "$0.00")) and not(contains(string(), "DIV/0"))]]]'
+       ('//draw:frame[descendant::{price}[descendant-or-self::*[string()]'
+        '[not(contains(string(), "$0.00"))'
+        ' and not(contains(string(), "DIV/0"))]]]'
         .format(**styles.nodetests)),
-       desc='Frames with price-styled paragraphs which contain text other than "$0.00".'),
+       desc='Frames with price-styled paragraphs'
+            ' which contain text other than "$0.00".'),
     XP('dollars_nonzero',
-       ('//draw:frame[descendant-or-self::*[contains(text(), "$")][not(contains(text(), "$0.00"))]]'
+       ('//draw:frame[descendant-or-self::*[contains(text(), "$")]'
+        '[not(contains(text(), "$0.00"))]]'
         .format(**styles.nodetests)),
-       desc="Frames containing nodes whose text contains a $ but not '$0.00'."),
+       desc="Frames containing nodes whose text contains a $ but not '$0.00'."
+            "This checks even those frames"
+            " which don't contain a price-styled paragraph node."),
     )
 
 all_frames = framesets[0]

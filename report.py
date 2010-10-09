@@ -55,5 +55,20 @@ def all_path_stats(tree, base_name='all_frames',
 def diff_report(tree, frame):
     """Returns diff report data for the frame."""
     return (tree.getpath(frame),
-            frame.xpath(styles.page_number_relpath, namespaces=frame.nsmap),
+            frame.xpath(styles.PageRelpaths.page_number, namespaces=frame.nsmap),
             frame.xpath('string()', namespaces=frame.nsmap))
+
+
+def frame_content(tree, frame):
+    """Returns discernable data for the frame."""
+    data = (('name', 'Item Name'),
+            ('page_number', 'Page Number in .odt Source'),
+            ('price', 'Item Price'),
+            ('full_text', 'Full Text of .odt Page'))
+    xpaths = ((label, getattr(styles.PageRelpaths, datum))
+              for datum, label in data)
+    return ((label, frame.xpath(path, namespaces=frame.nsmap))
+            for label, path in xpaths)
+
+def frameset_content(tree, frameset, frame_content=frame_content):
+    return (tuple(frame_content(tree, frame)) for frame in frameset)

@@ -12,7 +12,12 @@ def nodetest(style):
     return 'text:p[{expr}]'.format(expr=expr(style))
 
 nodetests = dict((style, nodetest(style))
-                    for style in names.keys())
+                 for style in names.keys())
 
-# A path relative to a page frame giving that page's page number.
-page_number_relpath = '@text:anchor-page-number'
+class PageRelpaths(object):
+    """xpaths relative to a page frame node for that page's data."""
+    page_number = '@text:anchor-page-number'
+    name = ('string(descendant::{name_1} | descendant::{name_2})'
+            .format(**nodetests))
+    price = 'string(descendant::{price})'.format(**nodetests)
+    full_text = 'string()'
