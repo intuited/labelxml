@@ -52,7 +52,7 @@ setup(
     keywords = split_keywords("""
         xml grainery odt openoffice
         """),
-    install_requires = ['lxml', 'yaml', 'argparse'],
+    install_requires = ['lxml', 'pyyaml', 'argparse'],
     packages = ['labelxml'],
     package_dir = {'labelxml': ''},
     entry_points = {
