@@ -30,13 +30,17 @@ Installation
 Installing the package archive using ``easy_install``
 should, at least in theory, get you a working ``labelxml``.
 
-There are some dependencies,
-notably on the external libxml2 and libxslt libraries.
+You will need to have the `setuptools`_ module installed.
+
+In addition to dependencies on Python modules,
+there are external dependencies on the ``libxml2`` and ``libxslt`` libraries.
 
 You may need to install separate operating system packages for those libraries
 if they are not installed by ``easy_install``.
 
 The author has not attempted to use this system under Windows.
+
+.. _setuptools: http://pypi.python.org/pypi/setuptools
 
 Data Extraction
 ---------------
