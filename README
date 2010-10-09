@@ -113,3 +113,12 @@ documentation of these modes is left unwritten.
 
 The nature of these commands may well be evident from the command help
 and from the source code itself.
+
+License
+-------
+
+``labelxml`` is licensed under the `FreeBSD license`_.
+
+See the file COPYING for details.
+
+.. _FreeBSD license: http://www.freebsd.org/copyright/freebsd-license.html
