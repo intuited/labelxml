@@ -26,7 +26,7 @@ class XP(object):
     def results(self, tree):
         return tree.xpath(self.xpath, namespaces=tree.getroot().nsmap)
 
-paths = (
+framesets = (
     XP('all_frames', '//draw:frame', 'all frames'),
     XP('names_prices',
        ('//draw:frame[(descendant::{name_1} or descendant::{name_2})'
@@ -47,6 +47,6 @@ paths = (
        desc='frames with names and prices with text content'),
     )
 
-all_frames = paths[0]
+all_frames = framesets[0]
 
-path_dict = dict((path.name, path) for path in paths)
+frameset_dict = dict((path.name, path) for path in framesets)

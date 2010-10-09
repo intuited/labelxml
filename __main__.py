@@ -17,9 +17,9 @@ def print_stats(tree, options):
 def print_diff(tree, options):
     import stats, report
     from pprint import pprint
-    base_path = paths.path_dict[options.base]
+    base_path = paths.frameset_dict[options.base]
     for path_name in options.path_names:
-        path = paths.path_dict[path_name]
+        path = paths.frameset_dict[path_name]
         missing_text_content = stats.PathStats(tree, base_path, path)
         pprint([report.diff_report(tree, frame)
                 for frame in missing_text_content.missing_text_content_frames])
@@ -47,7 +47,7 @@ def add_comparison_args(parser, path_names):
 def add_stats_command(subparsers, path_names):
     parser = subparsers.add_parser(
         'stats',
-        help='Get statistics comparing the chosen path(s) with the base path.',
+        help='Get statistics comparing the frames selected by the chosen path(s) with those selected by the base path.',
         )
     add_comparison_args(parser, path_names)
     parser.set_defaults(action=print_stats)
@@ -55,7 +55,7 @@ def add_stats_command(subparsers, path_names):
 def add_diff_command(subparsers, path_names):
     parser = subparsers.add_parser(
         'diff',
-        help='Show data found in the base dataset but not in the comparison dataset(s).',
+        help='Show frames found in the base frameset but not in the comparison frameset(s).',
         )
     add_comparison_args(parser, path_names)
     parser.set_defaults(action=print_diff)
@@ -64,11 +64,22 @@ def main():
     import argparse
     from lxml import etree
 
-    path_names = [path.name for path in paths.paths]
+    path_names = [path.name for path in paths.framesets]
 
     parser = argparse.ArgumentParser(
-        description=("Glean and analyze data"
-                     " from the Grainery's label templates file."),
+        description=(
+            "Glean and analyze data"
+            " from the Grainery's label templates file."
+            ),
+        epilog=(
+            "The `content.xml` file in the labels .odt archive"
+            " contains a number of 'frame sets',"
+            " all or some of which represent a page containing a label.  "
+            "The goal of this utility is to provide a convenient interface"
+            " to selecting from a number of xpath queries"
+            " in order to determine the correct query"
+            " with which to retrieve price data from the `content.xml` file.  "
+            "This utility can also be used to retrieve the data."),
         )
     parser.add_argument(
         'file',

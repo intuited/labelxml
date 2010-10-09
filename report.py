@@ -27,12 +27,12 @@ def get_report_data(tree, path, base=paths.all_frames):
     return path_stats.report_data()
 
 def all_path_stats(tree, base_name='all_frames',
-                         path_names=paths.path_dict.keys()):
+                         path_names=paths.frameset_dict.keys()):
     """Builds an iterator of reports for all paths or just those passed in.
 
-    Each path is compared to ``paths.path_dict[base]``.
+    Each path is compared to ``paths.frameset_dict[base]``.
 
-    ``paths`` is an iterable of keys from ``paths.path_dict``.
+    ``paths`` is an iterable of keys from ``paths.frameset_dict``.
 
     Yields a stats report on the base frame set,
     followed by stats reports
@@ -41,8 +41,8 @@ def all_path_stats(tree, base_name='all_frames',
     from functools import partial
     from itertools import chain
 
-    base = paths.path_dict[base_name]
-    paths_ = (paths.path_dict[key] for key in path_names
+    base = paths.frameset_dict[base_name]
+    paths_ = (paths.frameset_dict[key] for key in path_names
                                    if key is not base_name)
 
     get_data = partial(get_report_data, tree, base=base)
