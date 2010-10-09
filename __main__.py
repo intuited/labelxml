@@ -24,6 +24,13 @@ def print_diff(tree, options):
         pprint([report.diff_report(tree, frame)
                 for frame in missing_text_content.missing_text_content_frames])
 
+def print_xpaths(tree, options):
+    import paths
+    from pprint import pprint
+    data = ((('name', path.name), ('xpath', path.xpath), ('description', path.desc))
+            for path in paths.framesets)
+    for xpath in data:
+        pprint(xpath)
 
 def add_comparison_args(parser, path_names):
     parser.add_argument(
@@ -63,6 +70,13 @@ def add_diff_command(subparsers, path_names):
     add_comparison_args(parser, path_names)
     parser.set_defaults(action=print_diff)
 
+def add_xpaths_command(subparsers, path_names):
+    parser = subparsers.add_parser(
+        'xpaths',
+        help=('Display the available xpaths and their descriptions.'),
+        )
+    parser.set_defaults(action=print_xpaths)
+
 def main():
     import argparse
     from lxml import etree
@@ -96,6 +110,7 @@ def main():
 
     add_stats_command(subparsers, path_names)
     add_diff_command(subparsers, path_names)
+    add_xpaths_command(subparsers, path_names)
 
     options = parser.parse_args()
 
