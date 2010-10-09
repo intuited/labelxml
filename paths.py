@@ -50,7 +50,7 @@ framesets = (
         .format(**styles.nodetests)),
        desc='Frames with price-styled paragraphs which contain text.'),
     XP('prices_nonzero',
-       ('//draw:frame[descendant::{price}[descendant-or-self::*[string()][string() != "$0.00"]]]'
+       ('//draw:frame[descendant::{price}[descendant-or-self::*[string()][not(contains(string(), "$0.00")) and not(contains(string(), "DIV/0"))]]]'
         .format(**styles.nodetests)),
        desc='Frames with price-styled paragraphs which contain text other than "$0.00".')
     )

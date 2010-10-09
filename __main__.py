@@ -44,7 +44,7 @@ def add_comparison_args(parser, path_names):
     parser.add_argument(
         '-b', '--base',
         help="Name of the base path for comparison.  Options: [%(choices)s]; defaults to '%(default)s'.",
-        default='all_frames',
+        default='prices_nonzero',
         choices=path_names,
         metavar='PATH_NAME',
         )
