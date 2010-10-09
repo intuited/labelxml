@@ -64,6 +64,7 @@ def frame_content(tree, frame):
     data = (('name', 'Item Name'),
             ('page_number', 'Page Number in .odt Source'),
             ('price', 'Item Price'),
+            ('member_price', 'Member Price'),
             ('full_text', 'Full Text of .odt Page'))
     xpaths = ((label, getattr(styles.PageRelpaths, datum))
               for datum, label in data)

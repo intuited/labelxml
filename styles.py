@@ -3,6 +3,7 @@ names = {'name_1': 'P10',
          'name_2': 'P6',
          'origin': 'P5',
          'price': 'P9',
+         'member_price': 'P15',
          }
 
 def expr(style):
@@ -20,4 +21,5 @@ class PageRelpaths(object):
     name = ('string(descendant::{name_1} | descendant::{name_2})'
             .format(**nodetests))
     price = 'string(descendant::{price})'.format(**nodetests)
+    member_price = 'string(descendant::{member_price})'.format(**nodetests)
     full_text = 'string()'
