@@ -36,37 +36,12 @@ def print_xpaths(tree, options):
     for xpath in data:
         pprint(xpath)
 
-class DataValidationError(Exception):
-    pass
-
-def dump_json(pages):
-    from json import dumps
-    dicts = (dict(page) for page in pages)
-    def process(page):
-        page_numbers = page['Page Number in .odt Source']
-        if len(page_numbers) > 1:
-            raise DataValidationError("Found more than 1 page number for page {0}."
-                                      .format(page))
-        if not page_numbers:
-            raise DataValidationError("Did not find page number for page {0}"
-                                      .format(page))
-        page['Page Number in .odt Source'] = int(page_numbers[0])
-        return page
-    processed_pages = [process(page) for page in dicts]
-    return dumps(processed_pages, indent=True)
-
-def dump_yaml(pages):
-    from yaml import dump_all
-    return dump_all(pages)
-
-dumpers = {'json': dump_json, 'yaml': dump_yaml}
-
 def print_dump(tree, options):
-    import report, paths
+    import report, paths, dump
     xp = paths.frameset_dict[options.path_name]
     pages = report.frameset_content(tree, xp.results(tree))
-    dump = dumpers[options.output_format]
-    print dump(pages)
+    dump = dump.dumpers[options.output_format]
+    print dump(pages, options)
 
 # Argument parser components
 
@@ -120,6 +95,7 @@ def add_xpaths_command(subparsers):
     parser.set_defaults(action=print_xpaths)
 
 def add_dump_command(subparsers, path_names):
+    import dump
     parser = subparsers.add_parser(
         'dump',
         help=('Dump the dataset for the named xpath.'),
@@ -138,7 +114,7 @@ def add_dump_command(subparsers, path_names):
         help=('The format of the dumped data.'
               "Defaults to '%(default)s'."),
         default='json',
-        choices=dumpers.keys(),
+        choices=dump.dumpers.keys(),
         )
     parser.set_defaults(action=print_dump)
 
