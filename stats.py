@@ -1,5 +1,4 @@
 from memoize import memoized
-import paths
 
 class PathStats(object):
     def __init__(self, tree, base_xp, xp):
@@ -58,12 +57,3 @@ class PathStats(object):
                             formatdoc(getattr(type(self), e).__doc__),
                             getattr(self, e)))
                      for e in elements)
-
-def all_path_stats(tree):
-    from functools import partial
-    stats = partial(PathStats, tree, paths.all_frames)
-    def report(path):
-        return (('name', path.name),
-                ('xpath', path.xpath),
-                ('stats', stats(path).report_data()))
-    return (report(path) for path in paths.paths)

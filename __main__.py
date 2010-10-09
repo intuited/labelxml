@@ -5,13 +5,24 @@ Provides a command-line interface to the label data extractor.
 
 def print_stats(tree):
     from pprint import pprint
-    import stats, paths
-    results = tuple(stats.all_path_stats(tree))
+    import report
+    results = report.all_path_stats(tree)
     for result in results:
         pprint(result)
+
+# TODO: fix this and use it
+def missing(tree):
     missing_text_content = stats.PathStats(tree, paths.all_frames, paths.paths[3])
     pprint([(frame, frame.xpath('string()'))
             for frame in missing_text_content.missing_text_content_frames])
+
+# TODO: finish this and use it
+def add_stats_command(subparser):
+    parser = subparser.add_parser(
+        'stats',
+        help='Get statistics comparing the chosen path(s) with the base path.',
+        )
+
 
 def main():
     import argparse
@@ -28,6 +39,15 @@ def main():
               'This can be found in the root directory'
               ' of an unzipped labels .odt file.')
         )
+    # TODO: make this take effect
+    import paths
+    parser.add_argument(
+        '-b', '--base',
+        help="Identifier of the base path for comparison.",
+        default='all_frames',
+        choices=(path.name for path in paths.paths),
+        )
+
     options = parser.parse_args()
 
     tree = etree.parse(options.file)
