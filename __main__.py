@@ -14,12 +14,15 @@ def print_stats(tree, options):
     for result in results:
         pprint(result)
 
-
-# TODO: fix this and use it
-def missing(tree):
-    missing_text_content = stats.PathStats(tree, paths.all_frames, paths.paths[3])
-    pprint([(frame, frame.xpath('string()'))
-            for frame in missing_text_content.missing_text_content_frames])
+def print_diff(tree, options):
+    import stats, report
+    from pprint import pprint
+    base_path = paths.path_dict[options.base]
+    for path_name in options.path_names:
+        path = paths.path_dict[path_name]
+        missing_text_content = stats.PathStats(tree, base_path, path)
+        pprint([report.diff_report(tree, frame)
+                for frame in missing_text_content.missing_text_content_frames])
 
 
 def add_comparison_args(parser, path_names):
@@ -49,6 +52,13 @@ def add_stats_command(subparsers, path_names):
     add_comparison_args(parser, path_names)
     parser.set_defaults(action=print_stats)
 
+def add_diff_command(subparsers, path_names):
+    parser = subparsers.add_parser(
+        'diff',
+        help='Show data found in the base dataset but not in the comparison dataset(s).',
+        )
+    add_comparison_args(parser, path_names)
+    parser.set_defaults(action=print_diff)
 
 def main():
     import argparse
@@ -71,6 +81,7 @@ def main():
     subparsers = parser.add_subparsers()
 
     add_stats_command(subparsers, path_names)
+    add_diff_command(subparsers, path_names)
 
     options = parser.parse_args()
 

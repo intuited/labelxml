@@ -50,3 +50,7 @@ def all_path_stats(tree, base_name='all_frames',
 
     return (('base frame set', make_report(base_report, base)),
             ('compared frame sets', tuple(make_report(report, path) for path in paths_)))
+
+def diff_report(tree, frame):
+    """Returns diff report data for the frame."""
+    return (tree.getpath(frame), frame.xpath('string()'))
