@@ -27,8 +27,11 @@ The ``.odt`` file is structured thusly:
 Installation
 ------------
 
-Installing the package archive using ``easy_install``
-should, at least in theory, get you a working ``labelxml``.
+``labelxml`` can be acquired from the `github repo`_.
+
+Running ``easy_install .`` in the root of the extracted archive
+or cloned repo should, at least in theory, get you a working ``labelxml``
+script installed on your path.
 
 You will need to have the `setuptools`_ module installed.
 
@@ -40,6 +43,7 @@ if they are not installed by ``easy_install``.
 
 The author has not attempted to use this system under Windows.
 
+.. _github repo: http://github.com/intuited/labelxml
 .. _setuptools: http://pypi.python.org/pypi/setuptools
 
 Data Extraction
