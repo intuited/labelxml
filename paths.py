@@ -32,19 +32,27 @@ framesets = (
        ('//draw:frame[(descendant::{name_1} or descendant::{name_2})'
                     ' and descendant::{price}]'
         .format(**styles.nodetests)),
-       desc='frames with names and prices'),
+       desc='Frames with name- and price-styled paragraphs.'),
     XP('names_prices_text',
        ('//draw:frame[(descendant::{name_1}[descendant-or-self::text()]'
                       ' or descendant::{name_2}[descendant-or-self::text()])'
                     ' and descendant::{price}[descendant-or-self::text()]]'
         .format(**styles.nodetests)),
-       desc='frames with names and prices with text'),
+       desc='Frames with name- and price-styled paragraphs which have top-level text.'),
     XP('names_prices_tcontent',
        ('//draw:frame[(descendant::{name_1}[descendant-or-self::*[string()]]'
                       ' or descendant::{name_2}[descendant-or-self::*[string()]])'
                     ' and descendant::{price}[descendant-or-self::*[string()]]]'
         .format(**styles.nodetests)),
-       desc='frames with names and prices with text content'),
+       desc='Frames with name- and price-styled paragraphs which contain text.'),
+    XP('prices_tcontent',
+       ('//draw:frame[descendant::{price}[descendant-or-self::*[string()]]]'
+        .format(**styles.nodetests)),
+       desc='Frames with price-styled paragraphs which contain text.'),
+    XP('prices_nonzero',
+       ('//draw:frame[descendant::{price}[descendant-or-self::*[string()][string() != "$0.00"]]]'
+        .format(**styles.nodetests)),
+       desc='Frames with price-styled paragraphs which contain text other than "$0.00".')
     )
 
 all_frames = framesets[0]

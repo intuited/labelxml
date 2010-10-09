@@ -1,6 +1,7 @@
 """Encapsulates metadata about the label XML schema."""
 names = {'name_1': 'P10',
          'name_2': 'P6',
+         'origin': 'P5',
          'price': 'P9',
          }
 
