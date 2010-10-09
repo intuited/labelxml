@@ -2,11 +2,15 @@
 
 Provides a command-line interface to the label data extractor.
 """
+import paths
 
-def print_stats(tree):
+def print_stats(tree, path_names=None, base_name=None):
     from pprint import pprint
     import report
-    results = report.all_path_stats(tree)
+    kwargs = dict((n, v) for n, v in (('base_name', base_name),
+                                      ('path_names', path_names))
+                         if v is not None)
+    results = report.all_path_stats(tree, **kwargs)
     for result in results:
         pprint(result)
 
@@ -28,6 +32,8 @@ def main():
     import argparse
     from lxml import etree
 
+    path_names = [path.name for path in paths.paths]
+
     parser = argparse.ArgumentParser(
         description=("Glean and analyze data"
                      "from the Grainery's label templates file."),
@@ -39,20 +45,27 @@ def main():
               'This can be found in the root directory'
               ' of an unzipped labels .odt file.')
         )
-    # TODO: make this take effect
-    import paths
     parser.add_argument(
         '-b', '--base',
-        help="Identifier of the base path for comparison.",
+        help="Name of the base path for comparison.  Options: [%(choices)s]; defaults to '%(default)s'.",
         default='all_frames',
-        choices=(path.name for path in paths.paths),
+        choices=path_names,
+        metavar='PATH_NAME',
+        )
+    parser.add_argument(
+        '-n', '--path-names',
+        help="Names of the xpath or xpaths to be used.  Defaults to %(default)s.",
+        nargs='+',
+        default=('names_prices_tcontent',),
+        choices=path_names,
+        metavar='PATH_NAME',
         )
 
     options = parser.parse_args()
 
     tree = etree.parse(options.file)
 
-    print_stats(tree)
+    print_stats(tree, path_names=options.path_names, base_name=options.base)
 
 if __name__ == '__main__':
     main()
