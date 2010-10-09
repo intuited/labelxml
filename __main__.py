@@ -4,15 +4,16 @@ Provides a command-line interface to the label data extractor.
 """
 import paths
 
-def print_stats(tree, path_names=None, base_name=None):
+def print_stats(tree, options):
     from pprint import pprint
     import report
-    kwargs = dict((n, v) for n, v in (('base_name', base_name),
-                                      ('path_names', path_names))
-                         if v is not None)
+    kwargs = dict((attr, getattr(options, attr))
+                  for attr in ('base_name', 'path_names')
+                  if hasattr(options, attr))
     results = report.all_path_stats(tree, **kwargs)
     for result in results:
         pprint(result)
+
 
 # TODO: fix this and use it
 def missing(tree):
@@ -20,31 +21,8 @@ def missing(tree):
     pprint([(frame, frame.xpath('string()'))
             for frame in missing_text_content.missing_text_content_frames])
 
-# TODO: finish this and use it
-def add_stats_command(subparser):
-    parser = subparser.add_parser(
-        'stats',
-        help='Get statistics comparing the chosen path(s) with the base path.',
-        )
 
-
-def main():
-    import argparse
-    from lxml import etree
-
-    path_names = [path.name for path in paths.paths]
-
-    parser = argparse.ArgumentParser(
-        description=("Glean and analyze data"
-                     "from the Grainery's label templates file."),
-        )
-    parser.add_argument(
-        'file',
-        type=argparse.FileType('r'),
-        help=('The XML content file. '
-              'This can be found in the root directory'
-              ' of an unzipped labels .odt file.')
-        )
+def add_comparison_args(parser, path_names):
     parser.add_argument(
         '-b', '--base',
         help="Name of the base path for comparison.  Options: [%(choices)s]; defaults to '%(default)s'.",
@@ -61,11 +39,44 @@ def main():
         metavar='PATH_NAME',
         )
 
+
+# TODO: finish this and use it
+def add_stats_command(subparsers, path_names):
+    parser = subparsers.add_parser(
+        'stats',
+        help='Get statistics comparing the chosen path(s) with the base path.',
+        )
+    add_comparison_args(parser, path_names)
+    parser.set_defaults(action=print_stats)
+
+
+def main():
+    import argparse
+    from lxml import etree
+
+    path_names = [path.name for path in paths.paths]
+
+    parser = argparse.ArgumentParser(
+        description=("Glean and analyze data"
+                     " from the Grainery's label templates file."),
+        )
+    parser.add_argument(
+        'file',
+        type=argparse.FileType('r'),
+        help=('The XML content file. '
+              'This can be found in the root directory'
+              ' of an unzipped labels .odt file.')
+        )
+
+    subparsers = parser.add_subparsers()
+
+    add_stats_command(subparsers, path_names)
+
     options = parser.parse_args()
 
     tree = etree.parse(options.file)
 
-    print_stats(tree, path_names=options.path_names, base_name=options.base)
+    options.action(tree, options)
 
 if __name__ == '__main__':
     main()
